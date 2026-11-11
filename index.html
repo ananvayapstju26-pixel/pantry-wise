@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="PantryWise — a smart pantry & expiry tracker that helps you reduce food waste." />
+  <title>PantryWise · Smart Pantry & Expiry Tracker</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧺</text></svg>" />
+</head>
+<body>
+  <!-- ===== App shell ===== -->
+  <div class="app">
+    <!-- Sidebar / header nav -->
+    <header class="app__header">
+      <div class="brand">
+        <span class="brand__logo">🧺</span>
+        <div class="brand__text">
+          <h1>PantryWise</h1>
+          <p>Track it before it expires</p>
+        </div>
+      </div>
+
+      <nav class="nav" id="nav">
+        <button class="nav__item is-active" data-view="dashboard">📊 Dashboard</button>
+        <button class="nav__item" data-view="pantry">🥫 Pantry</button>
+        <button class="nav__item" data-view="shopping">🛒 Shopping</button>
+        <button class="nav__item" data-view="stats">📈 Stats</button>
+        <button class="nav__item" data-view="settings">⚙️ Settings</button>
+      </nav>
+
+      <div class="header__actions">
+        <button class="icon-btn" id="theme-toggle" title="Toggle theme" aria-label="Toggle dark mode">🌙</button>
+      </div>
+    </header>
+
+    <!-- ===== Main ===== -->
+    <main class="content" id="content">
+
+      <!-- ---------- Dashboard ---------- -->
+      <section class="view is-active" id="view-dashboard">
+        <div class="view__head">
+          <h2>Dashboard</h2>
+          <button class="btn btn--primary" data-open-add>＋ Add item</button>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat-card">
+            <span class="stat-card__icon">📦</span>
+            <div>
+              <p class="stat-card__label">Total items</p>
+              <p class="stat-card__value" id="stat-total">0</p>
+            </div>
+          </div>
+          <div class="stat-card stat-card--warn">
+            <span class="stat-card__icon">⏰</span>
+            <div>
+              <p class="stat-card__label">Expiring soon</p>
+              <p class="stat-card__value" id="stat-expiring">0</p>
+            </div>
+          </div>
+          <div class="stat-card stat-card--danger">
+            <span class="stat-card__icon">🗑️</span>
+            <div>
+              <p class="stat-card__label">Expired</p>
+              <p class="stat-card__value" id="stat-expired">0</p>
+            </div>
+          </div>
+          <div class="stat-card stat-card--info">
+            <span class="stat-card__icon">🛒</span>
+            <div>
+              <p class="stat-card__label">Low stock</p>
+              <p class="stat-card__value" id="stat-lowstock">0</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="dash-columns">
+          <div class="panel">
+            <div class="panel__head">
+              <h3>⏰ Expiring soon</h3>
+              <span class="panel__hint">Within 3 days</span>
+            </div>
+            <div class="panel__body" id="expiring-soon-list"><p class="empty">Nothing expiring soon 🎉</p></div>
+          </div>
+          <div class="panel">
+            <div class="panel__head">
+              <h3>🗑️ Already expired</h3>
+              <span class="panel__hint">Remove or toss these</span>
+            </div>
+            <div class="panel__body" id="expired-list"><p class="empty">No expired items — nice! ✨</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- Pantry ---------- -->
+      <section class="view" id="view-pantry">
+        <div class="view__head">
+          <h2>Your pantry</h2>
+          <button class="btn btn--primary" data-open-add>＋ Add item</button>
+        </div>
+
+        <div class="toolbar">
+          <input type="search" id="pantry-search" class="input" placeholder="Search items…" />
+          <select id="filter-category" class="input"><option value="all">All categories</option></select>
+          <select id="filter-location" class="input"><option value="all">All locations</option></select>
+          <select id="sort-by" class="input">
+            <option value="expiry-asc">Soonest expiry first</option>
+            <option value="expiry-desc">Latest expiry first</option>
+            <option value="name-asc">Name (A–Z)</option>
+            <option value="added-desc">Recently added</option>
+          </select>
+        </div>
+
+        <div class="item-grid" id="pantry-list"></div>
+        <p class="empty center" id="pantry-empty" hidden>No items match your filters.</p>
+      </section>
+
+      <!-- ---------- Shopping ---------- -->
+      <section class="view" id="view-shopping">
+        <div class="view__head">
+          <h2>Shopping list</h2>
+          <div class="view__actions">
+            <button class="btn btn--ghost" id="btn-autofill">✨ Add low-stock</button>
+            <button class="btn btn--ghost" id="btn-clear-done">Clear checked</button>
+          </div>
+        </div>
+
+        <form class="shopping-add" id="shopping-form">
+          <input type="text" id="shopping-name" class="input" placeholder="What do you need?" required />
+          <input type="number" id="shopping-qty" class="input input--xs" placeholder="Qty" min="1" value="1" />
+          <select id="shopping-unit" class="input input--xs"></select>
+          <select id="shopping-category" class="input"></select>
+          <button type="submit" class="btn btn--primary">Add</button>
+        </form>
+
+        <ul class="shopping-list" id="shopping-list"></ul>
+        <p class="empty center" id="shopping-empty" hidden>Your shopping list is empty.</p>
+      </section>
+
+      <!-- ---------- Stats ---------- -->
+      <section class="view" id="view-stats">
+        <div class="view__head">
+          <h2>Stats &amp; insights</h2>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat-card">
+            <span class="stat-card__icon">✅</span>
+            <div>
+              <p class="stat-card__label">Items used</p>
+              <p class="stat-card__value" id="stat-used">0</p>
+            </div>
+          </div>
+          <div class="stat-card stat-card--danger">
+            <span class="stat-card__icon">🗑️</span>
+            <div>
+              <p class="stat-card__label">Items wasted</p>
+              <p class="stat-card__value" id="stat-wasted">0</p>
+            </div>
+          </div>
+          <div class="stat-card stat-card--info">
+            <span class="stat-card__icon">📉</span>
+            <div>
+              <p class="stat-card__label">Waste rate</p>
+              <p class="stat-card__value" id="stat-waste-rate">0%</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <span class="stat-card__icon">🧾</span>
+            <div>
+              <p class="stat-card__label">Total tracked</p>
+              <p class="stat-card__value" id="stat-tracked">0</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-grid">
+          <div class="panel">
+            <div class="panel__head"><h3>Use vs waste</h3></div>
+            <div class="panel__body"><canvas id="chart-waste" height="220"></canvas></div>
+          </div>
+          <div class="panel">
+            <div class="panel__head"><h3>Items by category</h3></div>
+            <div class="panel__body"><canvas id="chart-categories" height="220"></canvas></div>
+          </div>
+          <div class="panel">
+            <div class="panel__head"><h3>Expiry timeline (next 7 days)</h3></div>
+            <div class="panel__body"><canvas id="chart-timeline" height="220"></canvas></div>
+          </div>
+          <div class="panel">
+            <div class="panel__head"><h3>Recent activity</h3></div>
+            <div class="panel__body" id="recent-activity"><p class="empty">No activity yet.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- Settings ---------- -->
+      <section class="view" id="view-settings">
+        <div class="view__head"><h2>Settings</h2></div>
+
+        <div class="panel">
+          <div class="panel__head"><h3>Appearance</h3></div>
+          <div class="panel__body">
+            <label class="setting-row">
+              <span>Theme</span>
+              <select id="setting-theme" class="input input--xs">
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel__head"><h3>Data</h3></div>
+          <div class="panel__body setting-actions">
+            <button class="btn" id="btn-sample">📥 Load sample data</button>
+            <button class="btn" id="btn-export">⬇️ Export CSV</button>
+            <button class="btn" id="btn-import">⬆️ Import CSV</button>
+            <input type="file" id="file-import" accept=".csv" hidden />
+            <button class="btn btn--danger" id="btn-clear">🗑️ Clear all data</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel__head"><h3>About</h3></div>
+          <div class="panel__body">
+            <p class="muted">PantryWise is a client-side pantry &amp; expiry tracker built with vanilla JavaScript. All your data stays in your browser — nothing is uploaded anywhere.</p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ===== Add / Edit modal ===== -->
+  <div class="modal" id="item-modal" hidden>
+    <div class="modal__backdrop" data-close-modal></div>
+    <div class="modal__card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal__head">
+        <h3 id="modal-title">Add item</h3>
+        <button class="icon-btn" data-close-modal aria-label="Close">✕</button>
+      </div>
+      <form id="item-form" class="form">
+        <input type="hidden" id="item-id" />
+        <div class="form__row">
+          <label class="form__field">
+            <span>Name *</span>
+            <input type="text" id="item-name" class="input" required maxlength="60" />
+          </label>
+          <label class="form__field form__field--xs">
+            <span>Quantity *</span>
+            <input type="number" id="item-quantity" class="input" required min="0" step="0.01" value="1" />
+          </label>
+          <label class="form__field form__field--xs">
+            <span>Unit</span>
+            <select id="item-unit" class="input"></select>
+          </label>
+        </div>
+        <div class="form__row">
+          <label class="form__field">
+            <span>Category</span>
+            <select id="item-category" class="input"></select>
+          </label>
+          <label class="form__field">
+            <span>Location</span>
+            <select id="item-location" class="input"></select>
+          </label>
+        </div>
+        <div class="form__row">
+          <label class="form__field">
+            <span>Purchase date</span>
+            <input type="date" id="item-purchase" class="input" />
+          </label>
+          <label class="form__field">
+            <span>Expiry date</span>
+            <input type="date" id="item-expiry" class="input" />
+          </label>
+        </div>
+        <p class="form__hint muted">Leave expiry blank for non-perishables. Low stock alert triggers at 1 item or less.</p>
+        <div class="form__actions">
+          <button type="button" class="btn btn--danger" id="btn-delete-item" hidden>Delete</button>
+          <div class="form__spacer"></div>
+          <button type="button" class="btn" data-close-modal>Cancel</button>
+          <button type="submit" class="btn btn--primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <!-- Chart.js (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- App scripts (load order matters) -->
+  <script src="js/utils.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/pantry.js"></script>
+  <script src="js/shopping.js"></script>
+  <script src="js/stats.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
